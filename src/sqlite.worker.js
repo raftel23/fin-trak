@@ -96,15 +96,16 @@ function seedCategories(userId) {
 function initSchema() {
   db.exec(SCHEMA);
 
-  // Migration: Add 'savings' to accounts table CHECK constraint
-  try {
-    const tableInfo = query("SELECT sql FROM sqlite_master WHERE name='accounts' AND type='table'")[0]?.sql || '';
-    if (tableInfo && !tableInfo.includes('savings')) {
-      console.log('[FinTrak DB] Migrating accounts table for new types...');
+  // Use user_version for robust migrations
+  const [{ user_version: version }] = query('PRAGMA user_version');
+  
+  if (version < 1) {
+    console.log('[FinTrak DB] Migrating schema to v1 (Savings & Investment support)...');
+    try {
       db.exec(`
         PRAGMA foreign_keys=OFF;
         BEGIN TRANSACTION;
-        DROP TABLE IF EXISTS accounts_old; 
+        DROP TABLE IF EXISTS accounts_old;
         ALTER TABLE accounts RENAME TO accounts_old;
         CREATE TABLE accounts (
           id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,15 +120,17 @@ function initSchema() {
         INSERT INTO accounts (id, user_id, name, type, balance, color, created_at)
         SELECT id, user_id, name, type, balance, color, created_at FROM accounts_old;
         DROP TABLE accounts_old;
+        PRAGMA user_version = 1;
         COMMIT;
         PRAGMA foreign_keys=ON;
       `);
-      console.log('[FinTrak DB] Migration successful.');
+      console.log('[FinTrak DB] Migration to v1 successful.');
+    } catch (err) {
+      console.error('[FinTrak DB] Migration v1 failed:', err);
+      try { db.exec('ROLLBACK;'); } catch(e) {}
+      // If accounts_old exists but accounts is gone, try to restore
+      try { db.exec('ALTER TABLE accounts_old RENAME TO accounts;'); } catch(e) {}
     }
-  } catch (err) {
-    console.error('[FinTrak DB] Migration failed:', err);
-    // Attempt rollback if we are in a transaction
-    try { db.exec('ROLLBACK;'); } catch(e) {}
   }
 }
 
