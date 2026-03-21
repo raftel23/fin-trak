@@ -1,14 +1,17 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { FloatingInput } from '../components/FloatingInput';
-import { loginUser } from '../auth';
+import { loginUser, decryptData } from '../auth';
 import { setSession } from '../session';
+import { importFullDatabase } from '../db';
 
 export function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showRestore, setShowRestore] = useState(false);
+  const [restorePassword, setRestorePassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +31,27 @@ export function LoginPage({ onLogin }) {
       setError(err.message || 'An error occurred during login.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRestore = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const pass = prompt('Enter the backup password:');
+    if (!pass) return;
+
+    setLoading(true);
+    setError('');
+    try {
+      const decrypted = await decryptData(file, pass);
+      await importFullDatabase(decrypted);
+      alert('Backup restored successfully! You can now log in.');
+    } catch (err) {
+      setError(err.message || 'Restoration failed.');
+    } finally {
+      setLoading(false);
+      e.target.value = ''; // Reset file input
     }
   };
 
@@ -68,6 +92,19 @@ export function LoginPage({ onLogin }) {
           type: 'button',
           onClick: () => window.location.hash = '#/register'
         }, 'Create Account')
+      ),
+      h('div', { class: 'divider mt-6' }),
+      h('div', { class: 'text-center mt-4' },
+        h('label', { class: 'btn-link', style: 'display: inline-block; cursor: pointer;' },
+          'Restore from Backup (.fintrak)',
+          h('input', {
+            type: 'file',
+            accept: '.fintrak',
+            style: 'display: none;',
+            onChange: handleRestore,
+            disabled: loading
+          })
+        )
       )
     )
   );

@@ -62,3 +62,13 @@ export function dbRun(sql, params = []) {
 export function seedCategories(userId) {
   return send({ type: 'seed_categories', userId });
 }
+
+/** Export entire database as a JSON object of tables */
+export function exportFullDatabase() {
+  return send({ type: 'export_all' });
+}
+
+/** Replace entire database with a provided JSON object */
+export function importFullDatabase(data) {
+  return send({ type: 'restore_all', data });
+}

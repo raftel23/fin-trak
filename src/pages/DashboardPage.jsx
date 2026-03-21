@@ -5,6 +5,8 @@ import 'uplot/dist/uPlot.min.css';
 import { dbQuery } from '../db';
 import { PieChart } from '../components/PieChart';
 import { generateInsights, fmt, monthStart, daysAgo } from '../insights';
+import { encryptData } from '../auth';
+import { exportFullDatabase } from '../db';
 
 export function DashboardPage({ user }) {
   const [data, setData] = useState({
@@ -84,6 +86,22 @@ export function DashboardPage({ user }) {
     }
   }
 
+  const handleExport = async () => {
+    try {
+      const dbData = await exportFullDatabase();
+      const blob = await encryptData(dbData, user.password);
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fintrak_backup_${new Date().toISOString().split('T')[0]}.fintrak`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('Export failed: ' + err.message);
+    }
+  };
+
   // Generate Insights
   const insights = useMemo(() => {
     if (loading) return [];
@@ -103,13 +121,20 @@ export function DashboardPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'mb-6' },
-      h('p', { class: 'text-muted font-medium' }, `Hello, ${user.first_name}`),
-      h('h1', { class: 'text-2xl font-extrabold' }, 'Financial Overview')
+    h('header', { class: 'flex-between mb-8' },
+      h('div', null,
+        h('p', { class: 'text-muted font-medium' }, `Hello, ${user.first_name}`),
+        h('h1', { class: 'text-2xl font-extrabold' }, 'Financial Overview')
+      ),
+      h('button', { 
+        class: 'btn-icon', 
+        title: 'Settings / Sync',
+        onClick: handleExport 
+      }, '⚙️')
     ),
 
     // Balance Card
-    h('div', { class: 'balance-hero mb-6' },
+    h('div', { class: 'balance-hero section-gap' },
       h('p', { class: 'balance-label' }, 'Net Worth'),
       h('div', { class: 'balance-amount' },
         h('span', { class: 'currency' }, '₱'),
@@ -128,7 +153,7 @@ export function DashboardPage({ user }) {
     ),
 
     // Insights
-    insights.length > 0 && h('div', { class: 'mb-6 flex flex-col gap-3' },
+    insights.length > 0 && h('div', { class: 'section-gap flex flex-col gap-3' },
       h('p', { class: 'section-label' }, 'Smart Insights'),
       insights.slice(0, 3).map((insight, i) =>
         h('div', { key: i, class: `insight-card ${insight.type}` },
@@ -139,7 +164,7 @@ export function DashboardPage({ user }) {
     ),
 
     // Pie Chart
-    h('div', { class: 'chart-wrap mb-6 px-4' },
+    h('div', { class: 'chart-wrap mb-8' },
       h('p', { class: 'chart-title' }, 'Expense Breakdown'),
       h(PieChart, {
         slices: data.categoryBreakdown.map(c => ({
@@ -151,9 +176,16 @@ export function DashboardPage({ user }) {
     ),
 
     // uPlot Trend
-    h('div', { class: 'chart-wrap mb-6 px-4' },
+    h('div', { class: 'chart-wrap mb-10' },
       h('p', { class: 'chart-title' }, '7-Day Trend'),
       h(TrendChart, { dailyTrend: data.dailyTrend })
+    ),
+
+    h('div', { class: 'text-center' },
+      h('button', { 
+        class: 'btn-link', 
+        onClick: handleExport 
+      }, '🔐 Create Encrypted Backup for Sync')
     )
   );
 }

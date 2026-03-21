@@ -261,6 +261,44 @@ self.onmessage = async ({ data }) => {
         result = { ok: true };
         break;
 
+      case 'export_all': {
+        result = {
+          users: query('SELECT * FROM users'),
+          accounts: query('SELECT * FROM accounts'),
+          categories: query('SELECT * FROM categories'),
+          transactions: query('SELECT * FROM transactions'),
+          version: query('PRAGMA user_version')[0]?.user_version
+        };
+        break;
+      }
+
+      case 'restore_all': {
+        const { data: d } = data;
+        db.exec(`
+          PRAGMA foreign_keys=OFF;
+          BEGIN TRANSACTION;
+          DELETE FROM transactions;
+          DELETE FROM categories;
+          DELETE FROM accounts;
+          DELETE FROM users;
+        `);
+
+        // Use prepare/step for bulk insert if data is large, but for now simple exec is fine
+        // for speed and safety we use separate execs
+        d.users?.forEach(u => run(`INSERT INTO users(id,username,password_hash,first_name,middle_name,last_name,created_at) VALUES(?,?,?,?,?,?,?)`, Object.values(u)));
+        d.accounts?.forEach(a => run(`INSERT INTO accounts(id,user_id,name,type,balance,color,created_at) VALUES(?,?,?,?,?,?,?)`, Object.values(a)));
+        d.categories?.forEach(c => run(`INSERT INTO categories(id,user_id,name,type,icon,color) VALUES(?,?,?,?,?,?)`, Object.values(c)));
+        d.transactions?.forEach(t => run(`INSERT INTO transactions(id,user_id,account_id,category_id,amount,type,note,date,created_at) VALUES(?,?,?,?,?,?,?,?,?)`, Object.values(t)));
+
+        db.exec(`
+          PRAGMA user_version = ${d.version || 2};
+          COMMIT;
+          PRAGMA foreign_keys=ON;
+        `);
+        result = { success: true };
+        break;
+      }
+
       default:
         throw new Error(`Unknown message type: ${type}`);
     }

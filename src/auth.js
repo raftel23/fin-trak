@@ -106,5 +106,81 @@ export async function loginUser({ username, password }) {
   if (!valid) return null;
 
   const { password_hash, ...safe } = user;
-  return safe;
+  return { ...safe, password }; // Include password for key derivation during export
+}
+
+// ─── Data Sync Encryption ─────────────────────────────────────────────────────
+
+/**
+ * Encrypt arbitrary JSON data with a password using AES-GCM.
+ * Used for multi-device sync (Export).
+ * @returns {Promise<Blob>}
+ */
+export async function encryptData(data, password) {
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  // Derive key from password
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt']
+  );
+
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    enc.encode(JSON.stringify(data))
+  );
+
+  // Bundle: [SALT(16)][IV(12)][CIPHERTEXT]
+  const bundle = new Uint8Array(salt.byteLength + iv.byteLength + ciphertext.byteLength);
+  bundle.set(salt, 0);
+  bundle.set(iv, salt.byteLength);
+  bundle.set(new Uint8Array(ciphertext), salt.byteLength + iv.byteLength);
+
+  return new Blob([bundle], { type: 'application/octet-stream' });
+}
+
+/**
+ * Decrypt a .fintrak blob with a password.
+ * Used for multi-device sync (Import).
+ */
+export async function decryptData(blob, password) {
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+  const buffer = await blob.arrayBuffer();
+  const bundle = new Uint8Array(buffer);
+
+  const salt = bundle.slice(0, 16);
+  const iv = bundle.slice(16, 28);
+  const ciphertext = bundle.slice(28);
+
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), { name: 'PBKDF2' }, false, ['deriveKey']
+  );
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+
+  try {
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      key,
+      ciphertext
+    );
+    return JSON.parse(dec.decode(decrypted));
+  } catch (err) {
+    throw new Error('Invalid password or corrupted backup file.');
+  }
 }
