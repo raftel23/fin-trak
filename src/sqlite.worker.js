@@ -96,14 +96,15 @@ function seedCategories(userId) {
 function initSchema() {
   db.exec(SCHEMA);
 
-  // Migration: Add 'investment' to accounts table CHECK constraint
+  // Migration: Add 'savings' to accounts table CHECK constraint
   try {
     const tableInfo = query("SELECT sql FROM sqlite_master WHERE name='accounts' AND type='table'")[0]?.sql || '';
     if (tableInfo && !tableInfo.includes('savings')) {
-      console.log('[FinTrak DB] Migrating accounts table for investments...');
+      console.log('[FinTrak DB] Migrating accounts table for new types...');
       db.exec(`
         PRAGMA foreign_keys=OFF;
         BEGIN TRANSACTION;
+        DROP TABLE IF EXISTS accounts_old; 
         ALTER TABLE accounts RENAME TO accounts_old;
         CREATE TABLE accounts (
           id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,6 +126,8 @@ function initSchema() {
     }
   } catch (err) {
     console.error('[FinTrak DB] Migration failed:', err);
+    // Attempt rollback if we are in a transaction
+    try { db.exec('ROLLBACK;'); } catch(e) {}
   }
 }
 

@@ -4,13 +4,16 @@
  * Optimized for production: Network-First for main shell, Cache-First for static assets.
  */
 
-const CACHE_NAME = 'fintrak-v2'; // Increment version to force refresh
+const CACHE_NAME = 'fintrak-v3'; // Increment version to force refresh
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
+  '/favicon.svg',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/fonts/inter.css',
+  '/fonts/inter-latin.woff2'
 ];
 
 self.addEventListener('install', (event) => {
