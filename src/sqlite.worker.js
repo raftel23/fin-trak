@@ -27,7 +27,7 @@ const SCHEMA = `
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id    INTEGER NOT NULL,
     name       TEXT    NOT NULL,
-    type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet','investment')),
+    type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet','investment','savings')),
     balance    REAL    NOT NULL DEFAULT 0,
     color      TEXT    NOT NULL DEFAULT '#6C63FF',
     created_at TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
@@ -99,7 +99,7 @@ function initSchema() {
   // Migration: Add 'investment' to accounts table CHECK constraint
   try {
     const tableInfo = query("SELECT sql FROM sqlite_master WHERE name='accounts' AND type='table'")[0]?.sql || '';
-    if (tableInfo && !tableInfo.includes('investment')) {
+    if (tableInfo && !tableInfo.includes('savings')) {
       console.log('[FinTrak DB] Migrating accounts table for investments...');
       db.exec(`
         PRAGMA foreign_keys=OFF;
@@ -109,7 +109,7 @@ function initSchema() {
           id         INTEGER PRIMARY KEY AUTOINCREMENT,
           user_id    INTEGER NOT NULL,
           name       TEXT    NOT NULL,
-          type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet','investment')),
+          type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet','investment','savings')),
           balance    REAL    NOT NULL DEFAULT 0,
           color      TEXT    NOT NULL DEFAULT '#6C63FF',
           created_at TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),

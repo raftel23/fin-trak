@@ -7,6 +7,14 @@ import { fmt } from '../insights';
 
 const COLORS = ['#6C63FF', '#00D4AA', '#FF6B8A', '#FFB547', '#4CC9F0', '#A29BFE', '#FDCB6E', '#00B4D8'];
 
+const ACCOUNT_ICONS = {
+  cash: '💵',
+  bank: '🏦',
+  ewallet: '📱',
+  investment: '📈',
+  savings: '💰'
+};
+
 export function AccountsPage({ user }) {
   const [accounts, setAccounts] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -64,7 +72,7 @@ export function AccountsPage({ user }) {
       accounts.map(acc => h('div', { key: acc.id, class: 'account-card', style: `border-left: 4px solid ${acc.color}` },
         h('div', { class: 'flex-between items-start mb-2' },
           h('p', { class: 'account-type-badge mb-0' }, 
-            acc.type === 'investment' ? '📈 investment' : acc.type
+            `${ACCOUNT_ICONS[acc.type] || '💳'} ${acc.type}`
           ),
           h('button', {
             class: 'btn-icon text-danger',
@@ -104,10 +112,11 @@ export function AccountsPage({ user }) {
           onChange: (e) => updateField('type', e.target.value),
           required: true
         }, [
-          h('option', { value: 'cash' }, 'Cash'),
-          h('option', { value: 'bank' }, 'Bank Account'),
-          h('option', { value: 'ewallet' }, 'E-Wallet'),
-          h('option', { value: 'investment' }, '📈 Investment Portfolio')
+          h('option', { value: 'cash' }, '💵 Cash'),
+          h('option', { value: 'bank' }, '🏦 Bank Account'),
+          h('option', { value: 'ewallet' }, '📱 E-Wallet'),
+          h('option', { value: 'investment' }, '📈 Investment Portfolio'),
+          h('option', { value: 'savings' }, '💰 Savings Account')
         ]),
         h(FloatingInput, {
           label: 'Initial Balance',
