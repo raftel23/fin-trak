@@ -121,7 +121,7 @@ export function LoginPage({ onLogin }) {
           })
         ),
         h('div', { class: 'mt-2 opacity-50 text-xs font-medium uppercase tracking-widest' }, 
-          'Developed by Denver Balangbang'
+          'Developed by Denver Balangbang © 2026. All rights reserved.'
         )
       )
     ),
