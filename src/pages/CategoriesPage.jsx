@@ -55,13 +55,13 @@ export function CategoriesPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'flex-between mb-6' },
+    h('header', { class: 'flex-between mb-8' },
       h('h1', { class: 'page-title' }, 'Categories'),
-      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add')
+      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add Category')
     ),
 
     h('div', { class: 'grid gap-3' },
-      categories.map(cat => h('div', { key: cat.id, class: 'cat-item' },
+      categories.map(cat => h('div', { key: cat.id, class: 'cat-item', style: 'padding: 14px 16px;' },
         h('div', { class: 'cat-icon', style: `background: ${cat.color}25; color: ${cat.color}` }, cat.icon),
         h('div', { class: 'cat-info' },
           h('p', { class: 'cat-name' }, cat.name),
@@ -69,13 +69,12 @@ export function CategoriesPage({ user }) {
         ),
         h('button', {
           class: 'btn-icon text-danger',
+          style: 'opacity: 0.6; transform: translateX(4px)',
           onClick: () => handleDelete(cat.id, cat.name),
           title: 'Delete Category'
         }, h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '18', height: '18', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
           h('polyline', { points: '3 6 5 6 21 6' }),
           h('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }),
-          h('line', { x1: '10', y1: '11', x2: '10', y2: '17' }),
-          h('line', { x1: '14', y1: '11', x2: '14', y2: '17' })
         ]))
       ))
     ),
