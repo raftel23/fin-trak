@@ -4,16 +4,6 @@ import { h } from 'preact';
  * FloatingInput
  * Hardware-accelerated floating label input component.
  * Uses only GPU-composited properties (transform, opacity) for label animation.
- *
- * @param {object} props
- * @param {string} props.label      - Visible label text
- * @param {string} props.name       - input name/id
- * @param {string} [props.type]     - input type
- * @param {string} [props.value]    - controlled value
- * @param {function} [props.onInput]- onInput handler
- * @param {string} [props.error]    - error message
- * @param {boolean} [props.required]
- * @param {string} [props.autocomplete]
  */
 export function FloatingInput({
   label,
@@ -31,6 +21,13 @@ export function FloatingInput({
   pattern,
   inputMode,
 }) {
+  const handleFocus = (e) => {
+    // Wait for keyboard animation to settle
+    setTimeout(() => {
+      e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 300);
+  };
+
   return h('div', { class: `field${error ? ' error' : ''}` },
     h('input', {
       id: name,
@@ -40,6 +37,7 @@ export function FloatingInput({
       placeholder: ' ',  // Required for :placeholder-shown selector
       onInput,
       onChange,
+      onFocus: handleFocus,
       required,
       autocomplete,
       min,
@@ -60,12 +58,19 @@ export function FloatingInput({
  * Floating label for <select> dropdowns.
  */
 export function FloatingSelect({ label, name, value, onChange, children, error, required }) {
+  const handleFocus = (e) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 300);
+  };
+
   return h('div', { class: `field${error ? ' error' : ''}` },
     h('select', {
       id: name,
       name,
       value,
       onChange,
+      onFocus: handleFocus,
       required,
       'aria-invalid': error ? 'true' : undefined,
     }, children),
@@ -81,8 +86,22 @@ export function FloatingSelect({ label, name, value, onChange, children, error, 
  * FloatingTextarea
  */
 export function FloatingTextarea({ label, name, value, onInput, error }) {
+  const handleFocus = (e) => {
+    setTimeout(() => {
+      e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 300);
+  };
+
   return h('div', { class: `field${error ? ' error' : ''}` },
-    h('textarea', { id: name, name, value, onInput, placeholder: ' ', rows: 3 }),
+    h('textarea', { 
+      id: name, 
+      name, 
+      value, 
+      onInput, 
+      onFocus: handleFocus,
+      placeholder: ' ', 
+      rows: 3 
+    }),
     h('label', { for: name }, label),
     error && h('p', { class: 'field-error' }, error)
   );
