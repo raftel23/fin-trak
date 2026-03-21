@@ -4,6 +4,7 @@ import { FloatingInput } from '../components/FloatingInput';
 import { loginUser, decryptData } from '../auth';
 import { setSession } from '../session';
 import { importFullDatabase } from '../db';
+import { Modal } from '../components/Modal';
 
 export function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -12,6 +13,7 @@ export function LoginPage({ onLogin }) {
   const [error, setError] = useState('');
   const [showRestore, setShowRestore] = useState(false);
   const [restorePassword, setRestorePassword] = useState('');
+  const [showFeatures, setShowFeatures] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +57,14 @@ export function LoginPage({ onLogin }) {
     }
   };
 
+  const FEATURES = [
+    { icon: '🛡️', title: 'Privacy First', desc: 'No servers. All your financial data is stored locally on your device only.' },
+    { icon: '🔐', title: 'Encrypted Sync', desc: 'Move data between devices safely with password-protected .fintrak portable files.' },
+    { icon: '📡', title: '100% Offline', desc: 'Works without internet. Your money tracking should never depend on a signal.' },
+    { icon: '📈', title: 'Smart Insights', desc: 'Visual charts and automated trend analysis to help you spend smarter.' },
+    { icon: '📱', title: 'Installable PWA', desc: 'Add to Home Screen for a native app experience on iOS and Android.' }
+  ];
+
   return h('div', { class: 'auth-page' },
     h('div', { class: 'auth-logo' },
       h('div', { class: 'auth-logo-icon' }, '💰'),
@@ -94,8 +104,13 @@ export function LoginPage({ onLogin }) {
         }, 'Create Account')
       ),
       h('div', { class: 'divider mt-6' }),
-      h('div', { class: 'text-center mt-4' },
-        h('label', { class: 'btn-link', style: 'display: inline-block; cursor: pointer;' },
+      h('div', { class: 'flex-center flex-col gap-3 mt-4' },
+        h('button', { 
+          type: 'button',
+          class: 'btn-link text-xs font-semibold uppercase tracking-wider',
+          onClick: () => setShowFeatures(true)
+        }, '💡 How FinTrak Works'),
+        h('label', { class: 'btn-link text-xs', style: 'display: inline-block; cursor: pointer;' },
           'Restore from Backup (.fintrak)',
           h('input', {
             type: 'file',
@@ -105,6 +120,29 @@ export function LoginPage({ onLogin }) {
             disabled: loading
           })
         )
+      )
+    ),
+
+    // --- Features Modal ---
+    showFeatures && h(Modal, { title: 'Discover FinTrak', onClose: () => setShowFeatures(false) },
+      h('div', { class: 'flex flex-col gap-6 py-2' },
+        h('div', { class: 'text-center' },
+          h('h3', { class: 'text-xl font-bold mb-2' }, 'Private, Fast & Portable'),
+          h('p', { class: 'text-dim text-sm' }, 'FinTrak isn\'t your typical finance app. It leverages cutting-edge web technology to give you 100% control over your data.')
+        ),
+        h('div', { class: 'grid gap-5' },
+          FEATURES.map(f => h('div', { key: f.title, class: 'flex gap-4 items-start' },
+            h('div', { class: 'flex-center rounded-xl bg-surface-2', style: 'width:48px; height:48px; min-width:48px; font-size:1.5rem;' }, f.icon),
+            h('div', null,
+              h('h4', { class: 'font-bold' }, f.title),
+              h('p', { class: 'text-dim text-xs leading-relaxed' }, f.desc)
+            )
+          ))
+        ),
+        h('button', { 
+          class: 'btn btn-primary btn-block mt-4',
+          onClick: () => setShowFeatures(false)
+        }, 'Awesome, Let\'s Go!')
       )
     )
   );
