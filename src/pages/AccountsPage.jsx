@@ -63,7 +63,9 @@ export function AccountsPage({ user }) {
     h('div', { class: 'grid gap-4' },
       accounts.map(acc => h('div', { key: acc.id, class: 'account-card', style: `border-left: 4px solid ${acc.color}` },
         h('div', { class: 'flex-between items-start mb-2' },
-          h('p', { class: 'account-type-badge mb-0' }, acc.type),
+          h('p', { class: 'account-type-badge mb-0' }, 
+            acc.type === 'investment' ? '📈 investment' : acc.type
+          ),
           h('button', {
             class: 'btn-icon text-danger',
             onClick: () => handleDelete(acc.id, acc.name),
@@ -104,7 +106,8 @@ export function AccountsPage({ user }) {
         }, [
           h('option', { value: 'cash' }, 'Cash'),
           h('option', { value: 'bank' }, 'Bank Account'),
-          h('option', { value: 'ewallet' }, 'E-Wallet')
+          h('option', { value: 'ewallet' }, 'E-Wallet'),
+          h('option', { value: 'investment' }, '📈 Investment Portfolio')
         ]),
         h(FloatingInput, {
           label: 'Initial Balance',

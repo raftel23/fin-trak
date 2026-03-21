@@ -27,7 +27,7 @@ const SCHEMA = `
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id    INTEGER NOT NULL,
     name       TEXT    NOT NULL,
-    type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet')),
+    type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet','investment')),
     balance    REAL    NOT NULL DEFAULT 0,
     color      TEXT    NOT NULL DEFAULT '#6C63FF',
     created_at TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
@@ -95,6 +95,37 @@ function seedCategories(userId) {
 /** Run schema migrations */
 function initSchema() {
   db.exec(SCHEMA);
+
+  // Migration: Add 'investment' to accounts table CHECK constraint
+  try {
+    const tableInfo = query("SELECT sql FROM sqlite_master WHERE name='accounts' AND type='table'")[0]?.sql || '';
+    if (tableInfo && !tableInfo.includes('investment')) {
+      console.log('[FinTrak DB] Migrating accounts table for investments...');
+      db.exec(`
+        PRAGMA foreign_keys=OFF;
+        BEGIN TRANSACTION;
+        ALTER TABLE accounts RENAME TO accounts_old;
+        CREATE TABLE accounts (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id    INTEGER NOT NULL,
+          name       TEXT    NOT NULL,
+          type       TEXT    NOT NULL CHECK(type IN ('cash','bank','ewallet','investment')),
+          balance    REAL    NOT NULL DEFAULT 0,
+          color      TEXT    NOT NULL DEFAULT '#6C63FF',
+          created_at TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        INSERT INTO accounts (id, user_id, name, type, balance, color, created_at)
+        SELECT id, user_id, name, type, balance, color, created_at FROM accounts_old;
+        DROP TABLE accounts_old;
+        COMMIT;
+        PRAGMA foreign_keys=ON;
+      `);
+      console.log('[FinTrak DB] Migration successful.');
+    }
+  } catch (err) {
+    console.error('[FinTrak DB] Migration failed:', err);
+  }
 }
 
 /** Sanitize results for JSON serialization (converts BigInt to Number) */
