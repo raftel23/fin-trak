@@ -10,6 +10,7 @@ export function TransactionsPage({ user }) {
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedTx, setSelectedTx] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -44,8 +45,8 @@ export function TransactionsPage({ user }) {
       setAccounts(accRows);
       setCategories(catRows);
 
-      if (accRows.length > 0) updateField('account_id', accRows[0].id);
-      if (catRows.length > 0) updateField('category_id', catRows.find(c => c.type === 'expense')?.id || catRows[0].id);
+      if (accRows.length > 0 && !formData.account_id) updateField('account_id', accRows[0].id);
+      if (catRows.length > 0 && !formData.category_id) updateField('category_id', catRows.find(c => c.type === 'expense')?.id || catRows[0].id);
 
     } catch (err) {
       console.error('Load Error:', err);
@@ -84,14 +85,13 @@ export function TransactionsPage({ user }) {
 
     try {
       // 1. Calculate balance reversal
-      // If we delete an income of 100, we subtract 100 from balance.
-      // If we delete an expense of 100, we add 100 back to balance.
       const reversal = tx.type === 'income' ? -tx.amount : tx.amount;
 
       // 2. Perform DB operations
       await dbRun('UPDATE accounts SET balance = balance + ? WHERE id = ?', [reversal, tx.account_id]);
       await dbRun('DELETE FROM transactions WHERE id = ?', [tx.id]);
 
+      setSelectedTx(null);
       loadData();
     } catch (err) {
       alert(err.message);
@@ -111,7 +111,12 @@ export function TransactionsPage({ user }) {
       h('p', { class: 'empty-title' }, 'No transactions yet'),
       h('p', { class: 'empty-desc' }, 'Tap the + button at the top to record your first expense or income.')
     ) : h('div', { class: 'fade-in-up' },
-      txs.map((tx) => h('div', { key: tx.id, class: 'tx-item' },
+      txs.map((tx) => h('div', { 
+        key: tx.id, 
+        class: 'tx-item', 
+        style: 'cursor: pointer;',
+        onClick: () => setSelectedTx(tx) 
+      },
         h('div', { class: 'tx-icon', style: `background:${tx.cat_color}25;color:${tx.cat_color}` }, tx.cat_icon),
         h('div', { class: 'tx-info' },
           h('p', { class: 'tx-name' }, tx.cat_name),
@@ -121,13 +126,42 @@ export function TransactionsPage({ user }) {
           h('div', { class: `tx-amount ${tx.type}` },
             tx.type === 'income' ? '+' : '-',
             fmt(tx.amount)
-          ),
-          h('button', { 
-            class: 'text-xs text-danger font-semibold opacity-60 hover:opacity-100',
-            onClick: () => handleDelete(tx)
-          }, 'Delete')
+          )
         )
       ))
+    ),
+
+    // --- Detail Modal ---
+    selectedTx && h(Modal, { title: 'Transaction Details', onClose: () => setSelectedTx(null) },
+      h('div', { class: 'flex flex-col gap-6' },
+        h('div', { class: 'flex-center flex-col gap-2' },
+          h('div', { class: 'tx-icon', style: `width:64px; height:64px; font-size:2rem; background:${selectedTx.cat_color}25; color:${selectedTx.cat_color}` }, selectedTx.cat_icon),
+          h('h2', { class: 'text-xl font-bold mt-2' }, selectedTx.cat_name),
+          h('div', { class: `text-3xl font-extrabold ${selectedTx.type}` }, 
+            selectedTx.type === 'income' ? '+' : '-', fmt(selectedTx.amount)
+          ),
+          h('p', { class: 'text-muted font-medium' }, selectedTx.date)
+        ),
+        h('div', { class: 'divider' }),
+        h('div', { class: 'grid gap-4' },
+          h('div', { class: 'flex-between' },
+            h('span', { class: 'text-dim font-bold uppercase text-xs tracking-wider' }, 'Account'),
+            h('span', { class: 'font-semibold' }, selectedTx.account_name)
+          ),
+          h('div', { class: 'flex-between' },
+            h('span', { class: 'text-dim font-bold uppercase text-xs tracking-wider' }, 'Type'),
+            h('span', { class: `chip chip-${selectedTx.type}` }, selectedTx.type)
+          ),
+          selectedTx.note && h('div', { class: 'mt-2' },
+            h('p', { class: 'text-dim font-bold uppercase text-xs tracking-wider mb-2' }, 'Note'),
+            h('div', { class: 'p-4 rounded-lg bg-surface-2 text-sm italic' }, selectedTx.note)
+          )
+        ),
+        h('button', { 
+          class: 'btn btn-danger btn-block mt-4',
+          onClick: () => handleDelete(selectedTx)
+        }, 'Delete Transaction')
+      )
     ),
 
     showModal && h(Modal, { title: 'New Transaction', onClose: () => setShowModal(false) },

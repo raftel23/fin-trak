@@ -6,7 +6,8 @@ import { dbQuery } from '../db';
 import { PieChart } from '../components/PieChart';
 import { generateInsights, fmt, monthStart, daysAgo } from '../insights';
 import { encryptData } from '../auth';
-import { exportFullDatabase } from '../db';
+import { exportFullDatabase, dbRun } from '../db';
+import { Modal } from '../components/Modal';
 
 export function DashboardPage({ user }) {
   const [data, setData] = useState({
@@ -18,6 +19,7 @@ export function DashboardPage({ user }) {
     dailyTrend: [], // { date, amount }
   });
   const [loading, setLoading] = useState(true);
+  const [selectedTx, setSelectedTx] = useState(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -63,7 +65,18 @@ export function DashboardPage({ user }) {
         ORDER BY date ASC
       `, [user.id, SevenDaysAgo]);
 
-      // 5. Weekly/Monthly Comparison Logic for Insights
+      // 5. Recent Transactions
+      const recentTxs = await dbQuery(`
+        SELECT t.*, a.name as account_name, c.name as cat_name, c.icon as cat_icon, c.color as cat_color
+        FROM transactions t
+        JOIN accounts a ON t.account_id = a.id
+        JOIN categories c ON t.category_id = c.id
+        WHERE t.user_id = ?
+        ORDER BY t.date DESC, t.id DESC
+        LIMIT 5
+      `, [user.id]);
+
+      // 6. Weekly/Monthly Comparison Logic for Insights
       const lastMonthExpRes = await dbQuery(`
         SELECT SUM(amount) as total FROM transactions
         WHERE user_id = ? AND type = 'expense'
@@ -77,6 +90,7 @@ export function DashboardPage({ user }) {
         thisMonthSummary,
         categoryBreakdown: categoryData,
         dailyTrend: trendData,
+        recentTransactions: recentTxs,
         lastMonthExpense: lastMonthExpRes[0]?.total || 0,
       });
     } catch (err) {
@@ -163,7 +177,7 @@ export function DashboardPage({ user }) {
       )
     ),
 
-    // Pie Chart
+    // Categories (Pie)
     h('div', { class: 'chart-wrap mb-8' },
       h('p', { class: 'chart-title' }, 'Expense Breakdown'),
       h(PieChart, {
@@ -175,10 +189,40 @@ export function DashboardPage({ user }) {
       })
     ),
 
-    // uPlot Trend
-    h('div', { class: 'chart-wrap mb-10' },
+    // 7-day Trend
+    h('div', { class: 'chart-wrap section-gap' },
       h('p', { class: 'chart-title' }, '7-Day Trend'),
       h(TrendChart, { dailyTrend: data.dailyTrend })
+    ),
+
+    // Recent Transactions
+    h('div', { class: 'mb-10' },
+      h('div', { class: 'flex-between mb-4' },
+        h('p', { class: 'section-label mb-0' }, 'Recent History'),
+        h('button', { 
+          class: 'btn-link', 
+          onClick: () => window.location.hash = '#/transactions' 
+        }, 'View All')
+      ),
+      h('div', { class: 'flex flex-col gap-2' },
+        data.recentTransactions.map(tx => h('div', { 
+          key: tx.id, 
+          class: 'tx-item', 
+          style: 'cursor: pointer;',
+          onClick: () => setSelectedTx(tx) 
+        },
+          h('div', { class: 'tx-icon', style: `background:${tx.cat_color}25;color:${tx.cat_color}` }, tx.cat_icon),
+          h('div', { class: 'tx-info' },
+            h('p', { class: 'tx-name' }, tx.cat_name),
+            h('p', { class: 'tx-meta' }, tx.date)
+          ),
+          h('div', { class: `tx-amount ${tx.type}` },
+            tx.type === 'income' ? '+' : '-',
+            fmt(tx.amount)
+          )
+        )),
+        data.recentTransactions.length === 0 && h('p', { class: 'text-center text-dim py-4' }, 'No recent activity.')
+      )
     ),
 
     h('div', { class: 'text-center' },
@@ -186,6 +230,39 @@ export function DashboardPage({ user }) {
         class: 'btn-link', 
         onClick: handleExport 
       }, '🔐 Create Encrypted Backup for Sync')
+    ),
+
+    // --- Detail Modal ---
+    selectedTx && h(Modal, { title: 'Transaction Details', onClose: () => setSelectedTx(null) },
+      h('div', { class: 'flex flex-col gap-6' },
+        h('div', { class: 'flex-center flex-col gap-2' },
+          h('div', { class: 'tx-icon', style: `width:64px; height:64px; font-size:2rem; background:${selectedTx.cat_color}25; color:${selectedTx.cat_color}` }, selectedTx.cat_icon),
+          h('h2', { class: 'text-xl font-bold mt-2' }, selectedTx.cat_name),
+          h('div', { class: `text-3xl font-extrabold ${selectedTx.type}` }, 
+            selectedTx.type === 'income' ? '+' : '-', fmt(selectedTx.amount)
+          ),
+          h('p', { class: 'text-muted font-medium' }, selectedTx.date)
+        ),
+        h('div', { class: 'divider' }),
+        h('div', { class: 'grid gap-4' },
+          h('div', { class: 'flex-between' },
+            h('span', { class: 'text-dim font-bold uppercase text-xs tracking-wider' }, 'Account'),
+            h('span', { class: 'font-semibold' }, selectedTx.account_name)
+          ),
+          h('div', { class: 'flex-between' },
+            h('span', { class: 'text-dim font-bold uppercase text-xs tracking-wider' }, 'Type'),
+            h('span', { class: `chip chip-${selectedTx.type}` }, selectedTx.type)
+          ),
+          selectedTx.note && h('div', { class: 'mt-2' },
+            h('p', { class: 'text-dim font-bold uppercase text-xs tracking-wider mb-2' }, 'Note'),
+            h('div', { class: 'p-4 rounded-lg bg-surface-2 text-sm italic' }, selectedTx.note)
+          )
+        ),
+        h('button', { 
+          class: 'btn btn-danger btn-block mt-4',
+          onClick: () => handleDelete(selectedTx)
+        }, 'Delete Transaction')
+      )
     )
   );
 }
