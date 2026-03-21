@@ -29,6 +29,14 @@ export function CategoriesPage({ user }) {
     finally { setLoading(false); }
   }
 
+  async function handleDelete(id, name) {
+    if (!confirm(`Are you sure you want to delete category "${name}"?\n\nThis will also PERMANENTLY delete all transactions associated with this category.`)) return;
+    try {
+      await dbRun('DELETE FROM categories WHERE id = ? AND user_id = ?', [id, user.id]);
+      loadCategories();
+    } catch (err) { alert(err.message); }
+  }
+
   const updateField = (f, v) => setFormData(p => ({ ...p, [f]: v }));
 
   async function handleAdd(e) {
@@ -58,7 +66,17 @@ export function CategoriesPage({ user }) {
         h('div', { class: 'cat-info' },
           h('p', { class: 'cat-name' }, cat.name),
           h('p', { class: 'cat-type uppercase font-bold text-xs opacity-60' }, cat.type)
-        )
+        ),
+        h('button', {
+          class: 'btn-icon text-danger',
+          onClick: () => handleDelete(cat.id, cat.name),
+          title: 'Delete Category'
+        }, h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '18', height: '18', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
+          h('polyline', { points: '3 6 5 6 21 6' }),
+          h('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }),
+          h('line', { x1: '10', y1: '11', x2: '10', y2: '17' }),
+          h('line', { x1: '14', y1: '11', x2: '14', y2: '17' })
+        ]))
       ))
     ),
 
