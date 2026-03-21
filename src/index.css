@@ -799,6 +799,39 @@ input, select, textarea { font-family: inherit; }
 
 /* ─── Color Swatches ─────────────────────────────────────────────────────────── */
 .color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+.color-swatch.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(255,255,255,0.2);
+}
+.color-swatch:hover { transform: scale(1.1); }
+
+/* ─── Icon Buttons ───────────────────────────────────────────────────────────── */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.btn-icon:hover {
+  background: rgba(255,255,255,0.06);
+}
+.btn-icon:active { transform: scale(0.9); }
+.color-swatches {
   display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
 }
 .color-swatch {
