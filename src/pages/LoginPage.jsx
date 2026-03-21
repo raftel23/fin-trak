@@ -119,6 +119,9 @@ export function LoginPage({ onLogin }) {
             onChange: handleRestore,
             disabled: loading
           })
+        ),
+        h('div', { class: 'mt-2 opacity-50 text-xs font-medium uppercase tracking-widest' }, 
+          'Developed by Denver Balangbang'
         )
       )
     ),
