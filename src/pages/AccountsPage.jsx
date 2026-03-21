@@ -63,9 +63,9 @@ export function AccountsPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'flex-between mb-6' },
+    h('header', { class: 'flex-between mb-8' },
       h('h1', { class: 'page-title' }, 'Accounts'),
-      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add')
+      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add Account')
     ),
 
     h('div', { class: 'grid gap-4' },
@@ -74,19 +74,22 @@ export function AccountsPage({ user }) {
           h('p', { class: 'account-type-badge mb-0' }, 
             `${ACCOUNT_ICONS[acc.type] || '💳'} ${acc.type}`
           ),
+          // Empty space here now that delete is moved
+          h('div', null)
+        ),
+        h('p', { class: 'account-name' }, acc.name),
+        h('div', { class: 'flex-between items-end' },
+          h('p', { class: 'account-balance mb-0' }, fmt(acc.balance)),
           h('button', {
             class: 'btn-icon text-danger',
+            style: 'opacity: 0.7; transform: translate(4px, 4px)',
             onClick: () => handleDelete(acc.id, acc.name),
             title: 'Delete Account'
           }, h('svg', { xmlns: 'http://www.w3.org/2000/svg', width: '18', height: '18', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [
             h('polyline', { points: '3 6 5 6 21 6' }),
             h('path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }),
-            h('line', { x1: '10', y1: '11', x2: '10', y2: '17' }),
-            h('line', { x1: '14', y1: '11', x2: '14', y2: '17' })
           ]))
-        ),
-        h('p', { class: 'account-name' }, acc.name),
-        h('p', { class: 'account-balance' }, fmt(acc.balance))
+        )
       )),
 
       accounts.length === 0 && h('div', { class: 'empty-state' },

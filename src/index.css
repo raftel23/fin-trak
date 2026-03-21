@@ -417,10 +417,11 @@ input, select, textarea { font-family: inherit; }
   left: 0;
   right: 0;
   height: var(--bottom-nav-h);
-  background: rgba(22, 22, 40, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
+  background: rgba(22, 22, 40, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1.5px solid var(--border);
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -643,7 +644,7 @@ input, select, textarea { font-family: inherit; }
   background: linear-gradient(135deg, var(--surface-2), var(--surface));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 18px;
+  padding: 14px 18px;
   position: relative;
   overflow: hidden;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
