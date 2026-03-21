@@ -4,7 +4,7 @@
  * Optimized for production: Network-First for main shell, Cache-First for static assets.
  */
 
-const CACHE_NAME = 'fintrak-v4'; // Increment version to force refresh
+const CACHE_NAME = 'fintrak-v5'; // Increment version to force refresh
 const ASSETS = [
   '/',
   '/index.html',

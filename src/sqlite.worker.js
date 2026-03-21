@@ -99,14 +99,37 @@ function initSchema() {
   // Use user_version for robust migrations
   const [{ user_version: version }] = query('PRAGMA user_version');
   
-  if (version < 1) {
-    console.log('[FinTrak DB] Migrating schema to v1 (Savings & Investment support)...');
+  if (version < 2) {
+    console.log(`[FinTrak DB] Performing Deep Clean Migration (v${version} -> v2)...`);
     try {
       db.exec(`
         PRAGMA foreign_keys=OFF;
         BEGIN TRANSACTION;
-        DROP TABLE IF EXISTS accounts_old;
-        ALTER TABLE accounts RENAME TO accounts_old;
+
+        -- 1. Backup existing data
+        DROP TABLE IF EXISTS tmp_users;
+        DROP TABLE IF EXISTS tmp_accounts;
+        DROP TABLE IF EXISTS tmp_categories;
+        DROP TABLE IF EXISTS tmp_transactions;
+
+        -- Safely rename existing tables (if they exist)
+        SELECT 1; -- Dummy to keep script aligned
+        ALTER TABLE users RENAME TO tmp_users;
+        ALTER TABLE accounts RENAME TO tmp_accounts;
+        ALTER TABLE categories RENAME TO tmp_categories;
+        ALTER TABLE transactions RENAME TO tmp_transactions;
+
+        -- 2. Recreate clean tables (using the global SCHEMA definitions)
+        -- We'll just define them again here to be 100% sure they are clean
+        CREATE TABLE users (
+          id           INTEGER PRIMARY KEY AUTOINCREMENT,
+          username     TEXT    UNIQUE NOT NULL COLLATE NOCASE,
+          password_hash TEXT   NOT NULL,
+          first_name   TEXT    NOT NULL,
+          middle_name  TEXT    DEFAULT '',
+          last_name    TEXT    NOT NULL,
+          created_at   TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+        );
         CREATE TABLE accounts (
           id         INTEGER PRIMARY KEY AUTOINCREMENT,
           user_id    INTEGER NOT NULL,
@@ -117,19 +140,50 @@ function initSchema() {
           created_at TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
-        INSERT INTO accounts (id, user_id, name, type, balance, color, created_at)
-        SELECT id, user_id, name, type, balance, color, created_at FROM accounts_old;
-        DROP TABLE accounts_old;
-        PRAGMA user_version = 1;
+        CREATE TABLE categories (
+          id      INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          name    TEXT    NOT NULL,
+          type    TEXT    NOT NULL CHECK(type IN ('income','expense')),
+          icon    TEXT    NOT NULL DEFAULT '📦',
+          color   TEXT    NOT NULL DEFAULT '#6C63FF',
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE TABLE transactions (
+          id          INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id     INTEGER NOT NULL,
+          account_id  INTEGER NOT NULL,
+          category_id INTEGER NOT NULL,
+          amount      REAL    NOT NULL CHECK(amount > 0),
+          type        TEXT    NOT NULL CHECK(type IN ('income','expense')),
+          note        TEXT    DEFAULT '',
+          date        TEXT    NOT NULL,
+          created_at  TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+          FOREIGN KEY (user_id)     REFERENCES users(id)     ON DELETE CASCADE,
+          FOREIGN KEY (account_id)  REFERENCES accounts(id)  ON DELETE CASCADE,
+          FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+        );
+
+        -- 3. Restore data
+        INSERT INTO users SELECT * FROM tmp_users;
+        INSERT INTO accounts SELECT * FROM tmp_accounts;
+        INSERT INTO categories SELECT * FROM tmp_categories;
+        INSERT INTO transactions SELECT * FROM tmp_transactions;
+
+        -- 4. Cleanup
+        DROP TABLE tmp_users;
+        DROP TABLE tmp_accounts;
+        DROP TABLE tmp_categories;
+        DROP TABLE tmp_transactions;
+
+        PRAGMA user_version = 2;
         COMMIT;
         PRAGMA foreign_keys=ON;
       `);
-      console.log('[FinTrak DB] Migration to v1 successful.');
+      console.log('[FinTrak DB] Deep Clean successful. Database is healthy.');
     } catch (err) {
-      console.error('[FinTrak DB] Migration v1 failed:', err);
+      console.error('[FinTrak DB] Migration v2 failed:', err);
       try { db.exec('ROLLBACK;'); } catch(e) {}
-      // If accounts_old exists but accounts is gone, try to restore
-      try { db.exec('ALTER TABLE accounts_old RENAME TO accounts;'); } catch(e) {}
     }
   }
 }
