@@ -97,6 +97,18 @@ function initSchema() {
   db.exec(SCHEMA);
 }
 
+/** Sanitize results for JSON serialization (converts BigInt to Number) */
+function sanitize(val) {
+  if (typeof val === 'bigint') return Number(val);
+  if (Array.isArray(val)) return val.map(sanitize);
+  if (val !== null && typeof val === 'object') {
+    const obj = {};
+    for (const k in val) obj[k] = sanitize(val[k]);
+    return obj;
+  }
+  return val;
+}
+
 /** Execute a query returning rows as objects */
 function query(sql, params = []) {
   const rows = [];
@@ -106,16 +118,16 @@ function query(sql, params = []) {
     rowMode: 'object',
     callback: (row) => rows.push(row),
   });
-  return rows;
+  return sanitize(rows);
 }
 
 /** Execute a statement returning { changes, lastInsertRowid } */
 function run(sql, params = []) {
   db.exec({ sql, bind: params });
-  return {
+  return sanitize({
     changes: db.changes(),
-    lastInsertRowid: db.lastInsertRowid ?? null,
-  };
+    lastInsertRowid: db.lastInsertRowid,
+  });
 }
 
 // ─── Message handler ──────────────────────────────────────────────────────────
