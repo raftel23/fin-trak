@@ -101,9 +101,9 @@ export function TransactionsPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'flex-between mb-4' },
+    h('header', { class: 'flex-between mb-8' },
       h('h1', { class: 'page-title' }, 'Transactions'),
-      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add')
+      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add Transaction')
     ),
 
     txs.length === 0 ? h('div', { class: 'empty-state' },
