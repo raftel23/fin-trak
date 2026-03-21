@@ -1,26 +1,22 @@
 /**
  * sw.js
  * Hand-written Service Worker for FinTrak.
- * Provides full offline support with a Cache-First strategy for static assets.
+ * Optimized for production: Network-First for main shell, Cache-First for static assets.
  */
 
-const CACHE_NAME = 'fintrak-v1';
+const CACHE_NAME = 'fintrak-v2'; // Increment version to force refresh
 const ASSETS = [
   '/',
   '/index.html',
-  '/src/main.jsx',
-  '/src/App.jsx',
-  '/src/index.css',
   '/manifest.webmanifest',
   '/icon-192.png',
-  '/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[FinTrak SW] Pre-caching assets');
+      console.log('[FinTrak SW] Pre-caching core assets');
       return cache.addAll(ASSETS);
     })
   );
@@ -39,22 +35,32 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // SQLite WASM / OPFS handles its own persistence; we only cache the UI shell and static deps.
+  const url = new URL(event.request.url);
+
+  // Network-First strategy for the main entry point to ensure users get the latest build
+  if (event.request.mode === 'navigate' || url.pathname === '/') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Cache-First strategy for others (images, fonts, bundles)
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request).then((networkResponse) => {
-        // Optionally cache new successful GET requests
         if (event.request.method === 'GET' && networkResponse.status === 200) {
           const cacheCopy = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, cacheCopy));
         }
         return networkResponse;
       });
-    }).catch(() => {
-      // Offline fallback for navigation
-      if (event.request.mode === 'navigate') {
-        return caches.match('/index.html');
-      }
     })
   );
 });
