@@ -122,7 +122,7 @@ export function LoginPage({ onLogin }) {
             disabled: loading
           })
         ),
-        h('div', { class: 'mt-2 opacity-50 text-xs font-medium uppercase tracking-widest' }, 
+        h('div', { class: 'mt-2 opacity-50 text-xs font-medium uppercase tracking-widest italic text-center' }, 
           'Developed by Denver Balangbang © 2026. All rights reserved.'
         )
       )
