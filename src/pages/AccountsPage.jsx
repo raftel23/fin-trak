@@ -63,8 +63,11 @@ export function AccountsPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'page-header mb-8' },
-      h('h1', { class: 'page-title' }, 'Accounts')
+    h('header', { class: 'page-header' },
+      h('div', { class: 'header-branding' },
+        h('img', { src: '/acorn_logo.png', class: 'header-logo', alt: 'Acorn' }),
+        h('h1', { class: 'page-title' }, 'Accounts')
+      )
     ),
 
     h('div', { class: 'grid gap-4' },

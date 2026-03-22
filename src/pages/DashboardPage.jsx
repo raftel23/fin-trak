@@ -135,10 +135,13 @@ export function DashboardPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'page-header mb-8' },
-      h('div', { class: 'text-center' },
-        h('p', { class: 'text-xs text-muted font-medium uppercase tracking-wider mb-1' }, `Hello, ${user.first_name}`),
-        h('h1', { class: 'text-xl font-medium' }, 'Financial Overview')
+    h('header', { class: 'page-header' },
+      h('div', { class: 'header-branding' },
+        h('img', { src: '/acorn_logo.png', class: 'header-logo', alt: 'Acorn' }),
+        h('div', { class: 'text-center' },
+          h('p', { class: 'text-xs text-muted font-medium uppercase tracking-wider' }, `Hello, ${user.first_name}`),
+          h('h1', { class: 'page-title' }, 'Financial Overview')
+        )
       ),
       h('button', { 
         class: 'btn-icon', 
