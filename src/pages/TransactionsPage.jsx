@@ -101,9 +101,8 @@ export function TransactionsPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'flex-between mb-8' },
-      h('h1', { class: 'page-title' }, 'Transactions'),
-      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add Transaction')
+    h('header', { class: 'page-header mb-8' },
+      h('h1', { class: 'page-title' }, 'Transactions')
     ),
 
     txs.length === 0 ? h('div', { class: 'empty-state' },
@@ -224,6 +223,13 @@ export function TransactionsPage({ user }) {
 
         h('button', { type: 'submit', class: 'btn btn-primary btn-block btn-lg mt-4' }, 'Save Transaction')
       )
-    )
+    ),
+
+    h('button', { 
+      class: 'fab', 
+      onClick: () => setShowModal(true),
+      'aria-label': 'Add Transaction',
+      title: 'Add Transaction'
+    }, '+')
   );
 }

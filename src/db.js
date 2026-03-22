@@ -21,7 +21,7 @@ function getWorker() {
       error ? p.reject(new Error(error)) : p.resolve(result);
     };
     worker.onerror = (e) => {
-      console.error('[FinTrak DB Worker Error]', e);
+      console.error('[Acorn] DB Worker Error', e);
     };
   }
   return worker;

@@ -55,9 +55,8 @@ export function CategoriesPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'flex-between mb-8' },
-      h('h1', { class: 'page-title' }, 'Categories'),
-      h('button', { class: 'btn btn-primary btn-sm', onClick: () => setShowModal(true) }, '+ Add Category')
+    h('header', { class: 'page-header mb-8' },
+      h('h1', { class: 'page-title' }, 'Categories')
     ),
 
     h('div', { class: 'grid gap-3' },
@@ -121,6 +120,13 @@ export function CategoriesPage({ user }) {
         ),
         h('button', { type: 'submit', class: 'btn btn-primary btn-block btn-lg mt-2' }, 'Create Category')
       )
-    )
+    ),
+
+    h('button', { 
+      class: 'fab', 
+      onClick: () => setShowModal(true),
+      'aria-label': 'Add Category',
+      title: 'Add Category'
+    }, '+')
   );
 }

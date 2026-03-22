@@ -8,7 +8,7 @@ render(<App />, document.getElementById('app'));
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('[FinTrak] SW Registered:', reg.scope))
-      .catch(err => console.error('[FinTrak] SW Registration Failed:', err));
+      .then(reg => console.log('[Acorn] SW Registered:', reg.scope))
+      .catch(err => console.error('[Acorn] SW Registration Failed:', err));
   });
 }

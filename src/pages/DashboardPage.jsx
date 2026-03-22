@@ -108,7 +108,7 @@ export function DashboardPage({ user }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `fintrak_backup_${new Date().toISOString().split('T')[0]}.fintrak`;
+      a.download = `acorn_backup_${new Date().toISOString().split('T')[0]}.acorn`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -135,10 +135,10 @@ export function DashboardPage({ user }) {
   if (loading) return h('div', { class: 'loader' }, h('div', { class: 'spinner' }));
 
   return h('div', { class: 'page-content' },
-    h('header', { class: 'flex-between mb-8' },
-      h('div', null,
-        h('p', { class: 'text-muted font-medium' }, `Hello, ${user.first_name}`),
-        h('h1', { class: 'text-2xl font-extrabold' }, 'Financial Overview')
+    h('header', { class: 'page-header mb-8' },
+      h('div', { class: 'text-center' },
+        h('p', { class: 'text-xs text-muted font-medium uppercase tracking-wider mb-1' }, `Hello, ${user.first_name}`),
+        h('h1', { class: 'text-xl font-medium' }, 'Financial Overview')
       ),
       h('button', { 
         class: 'btn-icon', 

@@ -149,7 +149,7 @@ export async function encryptData(data, password) {
 }
 
 /**
- * Decrypt a .fintrak blob with a password.
+ * Decrypt a .acorn or .fintrak blob with a password.
  * Used for multi-device sync (Import).
  */
 export async function decryptData(blob, password) {

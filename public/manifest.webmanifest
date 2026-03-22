@@ -1,6 +1,6 @@
 {
-  "name": "FinTrak – Smart Finance Tracker",
-  "short_name": "FinTrak",
+  "name": "Acorn – Grow Your Wealth",
+  "short_name": "Acorn",
   "description": "Track your income, expenses, and accounts offline-first.",
   "start_url": "/",
   "display": "standalone",

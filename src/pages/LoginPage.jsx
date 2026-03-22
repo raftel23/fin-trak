@@ -59,7 +59,7 @@ export function LoginPage({ onLogin }) {
 
   const FEATURES = [
     { icon: '🛡️', title: 'Privacy First', desc: 'No servers. All your financial data is stored locally on your device only.' },
-    { icon: '🔐', title: 'Encrypted Sync', desc: 'Move data between devices safely with password-protected .fintrak portable files.' },
+    { icon: '🔐', title: 'Encrypted Sync', desc: 'Move data between devices safely with password-protected .acorn portable files.' },
     { icon: '📡', title: '100% Offline', desc: 'Works without internet. Your money tracking should never depend on a signal.' },
     { icon: '📈', title: 'Smart Insights', desc: 'Visual charts and automated trend analysis to help you spend smarter.' },
     { icon: '📱', title: 'Installable PWA', desc: 'Add to Home Screen for a native app experience on iOS and Android.' }
@@ -67,9 +67,11 @@ export function LoginPage({ onLogin }) {
 
   return h('div', { class: 'auth-page' },
     h('div', { class: 'auth-logo' },
-      h('div', { class: 'auth-logo-icon' }, '💰'),
-      h('h1', null, 'FinTrak'),
-      h('p', null, 'Smart Financial Management')
+      h('div', { class: 'auth-logo-icon' }, 
+        h('img', { src: '/acorn_logo.png', alt: 'Acorn Logo' })
+      ),
+      h('h1', null, 'Acorn'),
+      h('p', null, 'Grow Your Wealth')
     ),
     h('form', { class: 'auth-card fade-in-up', onSubmit: handleSubmit },
       h('h2', { class: 'text-center mb-6 font-bold' }, 'Log In'),
@@ -109,12 +111,12 @@ export function LoginPage({ onLogin }) {
           type: 'button',
           class: 'btn-link text-xs font-semibold uppercase tracking-wider',
           onClick: () => setShowFeatures(true)
-        }, '💡 How FinTrak Works'),
+        }, '💡 How Acorn Works'),
         h('label', { class: 'btn-link text-xs', style: 'display: inline-block; cursor: pointer;' },
-          'Restore from Backup (.fintrak)',
+          'Restore from Backup (.acorn / .fintrak)',
           h('input', {
             type: 'file',
-            accept: '.fintrak',
+            accept: '.acorn,.fintrak',
             style: 'display: none;',
             onChange: handleRestore,
             disabled: loading
@@ -127,11 +129,11 @@ export function LoginPage({ onLogin }) {
     ),
 
     // --- Features Modal ---
-    showFeatures && h(Modal, { title: 'Discover FinTrak', onClose: () => setShowFeatures(false) },
+    showFeatures && h(Modal, { title: 'Discover Acorn', onClose: () => setShowFeatures(false) },
       h('div', { class: 'flex flex-col gap-6 py-2' },
         h('div', { class: 'text-center' },
           h('h3', { class: 'text-xl font-bold mb-2' }, 'Private, Fast & Portable'),
-          h('p', { class: 'text-dim text-sm' }, 'FinTrak isn\'t your typical finance app. It leverages cutting-edge web technology to give you 100% control over your data.')
+          h('p', { class: 'text-dim text-sm' }, 'Acorn isn\'t your typical finance app. It leverages cutting-edge web technology to give you 100% control over your data.')
         ),
         h('div', { class: 'grid gap-5' },
           FEATURES.map(f => h('div', { key: f.title, class: 'flex gap-4 items-start' },

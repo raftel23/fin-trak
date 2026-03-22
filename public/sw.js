@@ -4,22 +4,19 @@
  * Optimized for production: Network-First for main shell, Cache-First for static assets.
  */
 
-const CACHE_NAME = 'fintrak-v5'; // Increment version to force refresh
+const CACHE_NAME = 'acorn-v1';
 const ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/favicon.svg',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/fonts/inter.css',
-  '/fonts/inter-latin.woff2'
+  '/sw.js',
+  '/acorn_logo.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[FinTrak SW] Pre-caching core assets');
+      console.log('[Acorn] Cache version:', CACHE_NAME);
       return cache.addAll(ASSETS);
     })
   );
