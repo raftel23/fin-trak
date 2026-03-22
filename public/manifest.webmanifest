@@ -1,7 +1,7 @@
 {
-  "name": "Acorn – Grow Your Wealth",
+  "name": "Acorn – Financial flow, simplified",
   "short_name": "Acorn",
-  "description": "Track your income, expenses, and accounts offline-first.",
+  "description": "Financial flow, simplified. Track your income, expenses, and accounts offline-first.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

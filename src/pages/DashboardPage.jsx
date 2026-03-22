@@ -138,7 +138,8 @@ export function DashboardPage({ user }) {
     h('header', { class: 'page-header' },
       h('div', { class: 'text-center' },
         h('p', { class: 'text-xs text-muted font-medium uppercase tracking-wider' }, `Hello, ${user.first_name}`),
-        h('h1', { class: 'page-title' }, 'Financial Overview')
+        h('h1', { class: 'page-title' }, 'Financial Overview'),
+        h('p', { class: 'text-xs text-dim italic' }, 'Financial flow, simplified')
       ),
       h('button', { 
         class: 'btn-icon', 

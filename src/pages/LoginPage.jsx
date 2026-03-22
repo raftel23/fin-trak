@@ -71,7 +71,7 @@ export function LoginPage({ onLogin }) {
         h('img', { src: '/acorn_logo.png', alt: 'Acorn Logo' })
       ),
       h('h1', null, 'Acorn'),
-      h('p', null, 'Grow Your Wealth')
+      h('p', null, 'Financial flow, simplified')
     ),
     h('form', { class: 'auth-card fade-in-up', onSubmit: handleSubmit },
       h('h2', { class: 'text-center mb-6 font-bold' }, 'Log In'),
