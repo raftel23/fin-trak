@@ -56,10 +56,7 @@ export function CategoriesPage({ user }) {
 
   return h('div', { class: 'page-content' },
     h('header', { class: 'page-header' },
-      h('div', { class: 'header-branding' },
-        h('img', { src: '/acorn_logo.png', class: 'header-logo', alt: 'Acorn' }),
-        h('h1', { class: 'page-title' }, 'Categories')
-      )
+      h('h1', { class: 'page-title' }, 'Categories')
     ),
 
     h('div', { class: 'grid gap-3' },

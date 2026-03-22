@@ -407,7 +407,7 @@ input, select, textarea { font-family: inherit; }
   max-width: 640px;
   width: 100%;
   margin: 0 auto 24px;
-  background: rgba(15, 15, 26, 0.85); /* Slightly transparent */
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
@@ -450,11 +450,11 @@ input, select, textarea { font-family: inherit; }
   left: 0;
   right: 0;
   height: var(--bottom-nav-h);
-  background: rgba(22, 22, 40, 0.96);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-top: 1.5px solid var(--border);
-  box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -524,9 +524,9 @@ input, select, textarea { font-family: inherit; }
 }
 .auth-logo h1 {
   font-size: 2rem;
-  font-weight: 500; /* Reduced from 800 */
+  font-weight: 500;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #fff 40%, var(--primary));
+  background: linear-gradient(135deg, var(--text) 40%, var(--primary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -541,9 +541,7 @@ input, select, textarea { font-family: inherit; }
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(26, 26, 46, 0.8);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 28px 24px;
@@ -566,13 +564,13 @@ input, select, textarea { font-family: inherit; }
 
 /* ─── Dashboard ──────────────────────────────────────────────────────────────── */
 .balance-hero {
-  background: linear-gradient(135deg, #2D2B6B 0%, #1A1A3E 100%);
-  border: 1px solid rgba(108,99,255,0.25);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   border-radius: var(--radius-xl);
   padding: 32px 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-lg), 0 0 40px rgba(108,99,255,0.1);
+  box-shadow: 0 12px 32px var(--primary-glow);
+  color: #fff;
 }
 .balance-hero::before {
   content: '';
@@ -596,7 +594,7 @@ input, select, textarea { font-family: inherit; }
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
-  color: #fff;
+  color: inherit;
 }
 .balance-amount .currency {
   font-size: 1.2rem;

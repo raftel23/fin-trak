@@ -102,10 +102,7 @@ export function TransactionsPage({ user }) {
 
   return h('div', { class: 'page-content' },
     h('header', { class: 'page-header' },
-      h('div', { class: 'header-branding' },
-        h('img', { src: '/acorn_logo.png', class: 'header-logo', alt: 'Acorn' }),
-        h('h1', { class: 'page-title' }, 'Transactions')
-      )
+      h('h1', { class: 'page-title' }, 'Transactions')
     ),
 
     txs.length === 0 ? h('div', { class: 'empty-state' },
