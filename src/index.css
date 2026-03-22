@@ -918,23 +918,44 @@ input, select, textarea { font-family: inherit; }
   position: fixed;
   bottom: calc(var(--bottom-nav-h) + 16px);
   right: 20px;
-  width: 56px; height: 56px;
+  width: 60px; height: 60px;
   border-radius: 50%;
   background: var(--primary);
   color: #fff;
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 24px var(--primary-glow);
+  /* Embossed Effect */
+  box-shadow: 
+    0 8px 24px var(--primary-glow),
+    inset 0 4px 4px rgba(255,255,255,0.4),
+    inset 0 -4px 4px rgba(0,0,0,0.1);
+  border: 1.5px solid rgba(255,255,255,0.15);
   z-index: 90;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: all var(--transition-fast);
   transform: translateZ(0);
   will-change: transform;
+  animation: fabFloat 3s ease-in-out infinite;
 }
 .fab:hover, .fab:focus {
-  transform: scale(1.1) translateZ(0);
-  box-shadow: 0 8px 32px var(--primary-glow);
+  transform: translateY(-4px) scale(1.1) translateZ(0);
+  box-shadow: 
+    0 12px 32px var(--primary-glow),
+    inset 0 4px 4px rgba(255,255,255,0.5),
+    inset 0 -4px 4px rgba(0,0,0,0.1);
+  animation-play-state: paused;
 }
-.fab:active { transform: scale(0.95) translateZ(0); }
+.fab:active { 
+  transform: scale(0.92) translateZ(0);
+  box-shadow: 
+    0 4px 12px var(--primary-glow),
+    inset 0 -4px 4px rgba(255,255,255,0.3),
+    inset 0 4px 8px rgba(0,0,0,0.2);
+}
+
+@keyframes fabFloat {
+  0%, 100% { transform: translateY(0) translateZ(0); }
+  50% { transform: translateY(-10px) translateZ(0); }
+}
 
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 @media (min-width: 480px) {
